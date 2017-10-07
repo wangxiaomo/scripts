@@ -1,0 +1,42 @@
+#!/usr/bin/env perl
+
+use Getopt::Long;
+use Path::Tiny;
+use Data::Dump qw/dump/;
+
+GetOptions(
+    "name=s"      =>  \$name,
+    "host|h=s"    =>  \$host,
+    "port|p=s"    =>  \$port,
+    "restart=s"   =>  \$restart,
+    "link|l=s@"   =>  \$links,
+    "volumn|v=s@" =>  \$volumns,
+);
+
+die "Need Container Name" if scalar(@ARGV)<1;
+$container = $ARGV[0];
+
+@params = ();
+
+push @params, "--name " . $name if $name;
+push @params, "-e VIRTUAL_HOST=" . $host if $host;
+push @params, "-p $port" if $port;
+
+$restart = 'unless-stopped' if !$restart;
+push @params, "--restart=$restart";
+
+push @params, map {
+    "--links=$_"
+} @$links;
+
+for my $volumn (@$volumns) {
+    my ($src,$target) = split ':', $volumn;
+    $target = $target || '/var/www/html';
+    if(path($src)->exists){
+        push @params, "-v " . path($src)->realpath . ":" . $target;
+    }
+}
+
+$cmd = "docker run -d " . join(' ', @params) . " $container";
+print "Execute: $cmd\n";
+`$cmd`;
