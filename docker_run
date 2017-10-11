@@ -25,7 +25,7 @@ $restart = 'unless-stopped' if !$restart;
 push @params, "--restart=$restart";
 
 push @params, map {
-    "--links=$_"
+    "--link=$_"
 } @$links;
 
 for my $volumn (@$volumns) {
