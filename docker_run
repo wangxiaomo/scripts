@@ -10,6 +10,7 @@ GetOptions(
     "restart=s"   =>  \$restart,
     "link|l=s@"   =>  \$links,
     "volumn|v=s@" =>  \$volumns,
+    "env|e=s@"    =>  \$envs,
 );
 
 die "Need Container Name" if scalar(@ARGV)<1;
@@ -27,6 +28,10 @@ push @params, "--restart=$restart";
 push @params, map {
     "--link=$_"
 } @$links;
+
+push @params, map {
+    "-e $_"
+} @$envs;
 
 for my $volumn (@$volumns) {
     my ($src,$target) = split ':', $volumn;
